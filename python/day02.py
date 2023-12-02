@@ -1,5 +1,5 @@
 from pathlib import Path
-from pydantic import BaseModel
+from dataclasses import dataclass, field
 
 data = (Path(__file__).parent.parent / "data" / "day02.txt").read_text()
 
@@ -7,20 +7,22 @@ RED = 12
 GREEN = 13
 BLUE = 14
 
-class Round(BaseModel):
+@dataclass
+class Round:
     blue: int = 0
     red: int = 0
     green: int = 0
 
 
-class Game(BaseModel):
-    rounds: list[Round]
+@dataclass
+class Game:
+    rounds: list[Round] = field(default_factory=list)
 
 
 def parse_lines(data: str):
     games = []
     for row in data.splitlines():
-        game = Game(rounds=[])
+        game = Game()
         a, b = row.split(":")
         a = int(a.lstrip("Game "))
         b = b.split(';')
@@ -40,6 +42,7 @@ def parse_lines(data: str):
         games.append(game)
     return games
 
+
 def is_possible(game: Game):
     for round in game.rounds:
         if round.blue > BLUE:
@@ -50,8 +53,10 @@ def is_possible(game: Game):
             return False
     return True
 
+
 def count_possible(games: list[Game]):
     return sum(i for i, game in enumerate(games, 1) if is_possible(game))
+
 
 def power(game: Game):
     red = max(x.red for x in game.rounds)
@@ -60,11 +65,9 @@ def power(game: Game):
     return red * green * blue
 
 
-
-games = parse_lines(data)
-
-count = count_possible(games)
-print(count)
-
-powers = sum(power(game) for game in games)
-print(powers)
+if __name__ == "__main__":
+    games = parse_lines(data)
+    count = count_possible(games)
+    print(count)
+    powers = sum(power(game) for game in games)
+    print(powers)
