@@ -38,11 +38,8 @@ class ScratchCards:
 
     def count_cards(self):
         for key, (card, count) in self.cards.items():
-            if not (card and count):
-                return 0
             for i in range(key + 1, card.count_matches() + key + 1):
-                item = self.cards.get(i)
-                if item:
+                if item := self.cards.get(i):
                     cards[i] = (item[0], count + item[1])
 
 
