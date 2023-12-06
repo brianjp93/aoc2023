@@ -1,20 +1,12 @@
+import math
 data = """Time:        40     81     77     72
 Distance:   219   1012   1365   1089"""
 
-
 def find_wins(best_time: int, distance: int):
-    total = 0
-    for i in range(best_time):
-        if is_win(best_time, distance, i):
-            total += 1
-    return total
-
+    return sum(is_win(best_time, distance, i) for i in range(best_time))
 
 def is_win(best_time: int, distance: int, wind_up: int):
-    time_left = best_time - wind_up
-    my_dist = time_left * wind_up
-    return my_dist > distance
-
+    return (best_time - wind_up) * wind_up > distance
 
 def parse(data):
     lines = data.splitlines()
@@ -22,21 +14,10 @@ def parse(data):
     distances = [int(x) for x in lines[1].split(":")[-1].split()]
     return times, distances
 
-def parse2(data):
-    lines = data.splitlines()
-    time = int(''.join(lines[0].split(":")[-1].split()))
-    dist = int(''.join(lines[1].split(":")[-1].split()))
-    return time, dist
-
-
 if __name__ == '__main__':
-    prod = 1
     times, distances = parse(data)
-    for time, dist in zip(times, distances):
-        x = find_wins(time, dist)
-        prod *= x
-    print(prod)
+    print(math.prod(find_wins(time, dist) for time, dist in zip(times, distances)))
 
-    time, dist = parse2(data)
+    time, dist = int(''.join(map(str, times))), int(''.join(map(str, distances)))
     x = find_wins(time, dist)
     print(x)
