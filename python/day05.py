@@ -132,18 +132,22 @@ def convert_ranges(almanac: Almanac):
             yield almanac.convert_to(n)
 
 
+# search up quickly then back down once we find the first valid seed
+def find_lowest(almanac: Almanac):
+    location = 0
+    while True:
+        seed = almanac.convert_backward_full(location)
+        if almanac.is_valid_seed(seed):
+            while True:
+                seed = almanac.convert_backward_full(location)
+                if almanac.is_valid_seed(seed):
+                    location -= 1
+                else:
+                    return location + 1
+        location += 10000
+
+
 if __name__ == '__main__':
     almanac = parse(data)
     print(min(almanac.convert_to(seed) for seed in almanac.seeds))
-
-    is_valid = False
-    location = 0
-    while not is_valid:
-        # if location % 10000 == 0:
-        #     print(f'checking {location=}')
-        #     pass
-        seed = almanac.convert_backward_full(location)
-        if almanac.is_valid_seed(seed):
-            print(f'location {location=}')
-            break
-        location += 1
+    print(find_lowest(almanac))
