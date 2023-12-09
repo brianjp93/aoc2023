@@ -16,9 +16,7 @@ class Hand:
 
     @cached_property
     def groups(self):
-        cards = [(x[1], self.RANKS.index(x[0])) for x in Counter(self.cards).items()]
-        cards.sort(reverse=True)
-        return cards
+        return sorted([(x[1], self.RANKS.index(x[0])) for x in Counter(self.cards).items()], reverse=True)
 
     @cached_property
     def best_hand(self):
@@ -70,64 +68,26 @@ class Hand:
             return False
         return self.card_ranks < other.card_ranks
 
-    def __gt__(self, other: Self):
-        if self.jokers_on:
-            this_card = self.best_hand
-            other_card = other.best_hand
-        else:
-            this_card = self
-            other_card = other
-        if this_card.rank > other_card.rank:
-            return True
-        elif this_card.rank < other_card.rank:
-            return False
-        return self.card_ranks > other.card_ranks
 
-    def __eq__(self, other: Self):
-        if self.jokers_on:
-            this_card = self.best_hand
-            other_card = other.best_hand
-        else:
-            this_card = self
-            other_card = other
-        if this_card.rank != other_card.rank:
-            return False
-        return self.card_ranks == other.card_ranks
-
-
-def parse(data):
+def parse(data, jokers=False):
     hands: list[Hand] = []
+    kwargs = {} if not jokers else {
+        'RANKS': ['J', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'Q', 'K', 'A'],
+        'jokers_on': True
+    }
     for line in data.splitlines():
         hand, bid = line.split()
-        hands.append(Hand(cards=hand, bid=int(bid)))
+        hands.append(Hand(cards=hand, bid=int(bid), **kwargs))
     return hands
 
-def parse2(data):
-    hands: list[Hand] = []
-    for line in data.splitlines():
-        hand, bid = line.split()
-        hands.append(
-            Hand(
-                cards=hand,
-                bid=int(bid),
-                RANKS=['J', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'Q', 'K', 'A'],
-                jokers_on=True,
-            )
-        )
-    return hands
 
 def find_winnings(hands: list[Hand]):
-    total = 0
     hands.sort()
-    for i, hand in enumerate(hands, 1):
-        total += hand.bid * i
-    return total
+    return sum(hand.bid * i for i, hand in enumerate(hands, 1))
 
 if __name__ == '__main__':
     hands = parse(data)
-    winnings = find_winnings(hands)
-    print(winnings)
+    print(find_winnings(hands))
 
-    hands = parse2(data)
-    winnings = find_winnings(hands)
-    print(winnings)
+    hands = parse(data, jokers=True)
+    print(find_winnings(hands))
