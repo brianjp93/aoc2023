@@ -1,3 +1,4 @@
 .condaenv
 .pyc
 __pycache__
+rust/target
