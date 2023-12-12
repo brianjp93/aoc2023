@@ -1,10 +1,8 @@
 from pathlib import Path
 from dataclasses import dataclass
-from typing import TypeAlias
+
 
 data = (Path(__file__).parent.parent / "data" / "day11.txt").read_text()
-
-Coord: TypeAlias = tuple[int, int]
 
 
 @dataclass
@@ -12,15 +10,8 @@ class Universe:
     map: list[list[str]]
 
     def find_empty(self):
-        empty_rows = []
-        for y, row in enumerate(self.map):
-            if all(ch == "." for ch in row):
-                empty_rows.append(y)
-
-        empty_cols = []
-        for x in range(len(self.map[0])):
-            if all(self.map[y][x] == "." for y in range(len(self.map))):
-                empty_cols.append(x)
+        empty_rows = [y for y, row in enumerate(self.map) if all(ch == "." for ch in row)]
+        empty_cols = [x for x, col in enumerate(zip(*self.map)) if all(ch == "." for ch in col)]
         return empty_rows, empty_cols
 
     def stars(self):
@@ -36,7 +27,7 @@ class Universe:
         stars = self.stars()
         for i, star in enumerate(stars[:-1]):
             for other in stars[i+1:]:
-                dist += abs(star[0] - other[0]) + abs(star[1] - other[1])
+                dist += sum(abs(a - b) for a, b in zip(star, other))
         return dist
 
     def calculate_expansions(self):
@@ -54,15 +45,8 @@ class Universe:
         return multiple
 
 
-def parse(data):
-    rows = []
-    for line in data.splitlines():
-        rows.append([x for x in line])
-    return Universe(map=rows)
-
-
 if __name__ == '__main__':
-    x = parse(data)
+    x = Universe(map=[[x for x in line] for line in data.splitlines()])
     initial = x.find_distances()
     multiple = x.calculate_expansions()
 
