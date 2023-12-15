@@ -127,6 +127,5 @@ if __name__ == '__main__':
     print(load)
 
     m = parse(data)
-
     m = get_index(1000000000, m)
     print(calculate_load(m))
