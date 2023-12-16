@@ -1,9 +1,27 @@
 from pathlib import Path
+from dataclasses import dataclass, field
 
 data = (Path(__file__).parent.parent / "data" / "day15.txt").read_text()
 
 
-HASHMAP = [[] for _ in range(257)]
+@dataclass
+class HashMap:
+    m: list[list[tuple[str, int]]] = field(default_factory=lambda: [[] for _ in range(257)])
+
+    def __setitem__(self, label: str, value: int):
+        idx = do_hash(label)
+        if lst := [(i, x[0]) for i, x in enumerate(self.m[idx]) if x[0] == label]:
+            box_idx, label = lst[0]
+            self.m[idx][box_idx] = (label, value)
+        else:
+            self.m[idx].append((label, value))
+
+    def __delitem__(self, label: str):
+        idx = do_hash(label)
+        if lst := [(i, x[0]) for i, x in enumerate(self.m[idx]) if x[0] == label]:
+            box_idx, label = lst[0]
+            del self.m[idx][box_idx]
+
 
 def do_hash(item: str):
     val = 0
@@ -15,33 +33,18 @@ def do_hash(item: str):
 
 if __name__ == "__main__":
     data = data.strip().split(",")
-    total = 0
-    for line in data:
-        total += do_hash(line)
-    print(total)
+    print(sum(do_hash(line) for line in data))
 
-
+    hm = HashMap()
     for line in data:
         if '=' in line:
             label, focal = line.split('=')
-            focal = int(focal)
-            idx = do_hash(label)
-            try:
-                i = [x[0] for x in HASHMAP[idx]].index(label)
-                HASHMAP[idx][i] = (label, focal)
-            except ValueError:
-                HASHMAP[idx].append((label, focal))
+            hm[label] = int(focal)
         elif '-' in line:
-            label = line.rstrip('-')
-            idx = do_hash(label)
-            try:
-                i = [x[0] for x in HASHMAP[idx]].index(label)
-                del HASHMAP[idx][i]
-            except ValueError:
-                pass
+            del hm[line.rstrip('-')]
 
-    focusing_power = 0
-    for i, box in enumerate(HASHMAP):
-        for j, (label, focal) in enumerate(box, 1):
-            focusing_power += (i + 1) * focal * j
+    focusing_power = sum(
+        sum((i+1) * focal * j for j, (_, focal) in enumerate(box, 1))
+        for i, box in enumerate(hm.m)
+    )
     print(focusing_power)
