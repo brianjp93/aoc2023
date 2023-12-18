@@ -41,6 +41,8 @@ class Map:
         return cls(m=data.splitlines())
 
     def get(self, x: int, y: int, default=None):
+        if x < 0 or y < 0:
+            return default
         try:
             return self.m[y][x]
         except IndexError:
@@ -52,8 +54,6 @@ class Map:
         stack = [start]
         while stack:
             coord, vector = stack.pop()
-            if coord[0] < 0 or coord[1] < 0:
-                continue
             ch = self.get(*coord)
             if not ch:
                 continue
