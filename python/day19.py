@@ -9,7 +9,12 @@ data = (Path(__file__).parent.parent / "data" / "day19.txt").read_text()
 
 
 class RangeSet:
-    def __init__(self, ranges: list[tuple[int, int]] | None=None, start: int|None=None, end: int|None=None):
+    def __init__(
+        self,
+        ranges: list[tuple[int, int]] | None = None,
+        start: int | None = None,
+        end: int | None = None,
+    ):
         if ranges:
             self.ranges = ranges
         else:
@@ -60,7 +65,7 @@ class Part(TypedDict):
 @dataclass
 class Condition:
     name: str
-    comparison: Literal['>', '<']
+    comparison: Literal[">", "<"]
     value: int
     action: str
 
@@ -78,13 +83,13 @@ class Workflow:
         b = b.split(",")
         cmps = []
         for part in b[:-1]:
-            if '<' in part:
-                id_, last = part.split('<')
-                comparison = '<'
+            if "<" in part:
+                id_, last = part.split("<")
+                comparison = "<"
             else:
-                id_, last = part.split('>')
-                comparison = '>'
-            value, action = last.split(':')
+                id_, last = part.split(">")
+                comparison = ">"
+            value, action = last.split(":")
             cmps.append(Condition(id_, comparison, int(value), action=action))
         return cls(name=name, default=b[-1], conditions=cmps)
 
@@ -98,37 +103,37 @@ def parse(data):
         wfls[workflow.name] = workflow
     for p in bot.splitlines():
         x, m, a, s = map(int, re.findall(r"=(\d+)", p))
-        parts.append({'x': x, 'm': m, 'a': a, 's': s})
+        parts.append({"x": x, "m": m, "a": a, "s": s})
     return wfls, parts
 
 
 def count_valid(flows: dict[str, Workflow]):
     ratings: dict[str, RangeSet] = {
-        'x': RangeSet(start=1, end=4000),
-        'm': RangeSet(start=1, end=4000),
-        'a': RangeSet(start=1, end=4000),
-        's': RangeSet(start=1, end=4000),
+        "x": RangeSet(start=1, end=4000),
+        "m": RangeSet(start=1, end=4000),
+        "a": RangeSet(start=1, end=4000),
+        "s": RangeSet(start=1, end=4000),
     }
-    stack = [(ratings, flows['in'])]
+    stack = [(ratings, flows["in"])]
     count = 0
     valid_ratings: list[dict[str, RangeSet]] = []
     while stack:
         ratings, flow = stack.pop()
         for cond in flow.conditions:
             rating = ratings[cond.name]
-            if cond.comparison == '<':
+            if cond.comparison == "<":
                 success = rating - RangeSet(start=cond.value, end=4000)
                 failure = rating - RangeSet(start=1, end=cond.value - 1)
             else:
                 success = rating - RangeSet(start=1, end=cond.value)
                 failure = rating - RangeSet(start=cond.value + 1, end=4000)
 
-            if cond.action == 'A':
+            if cond.action == "A":
                 nratings = deepcopy(ratings)
                 nratings[cond.name] = success
                 valid_ratings.append(nratings)
                 # count += prod(len(x) for x in nratings.values())
-            elif cond.action == 'R':
+            elif cond.action == "R":
                 pass
             else:
                 nflow = flows[cond.action]
@@ -138,10 +143,10 @@ def count_valid(flows: dict[str, Workflow]):
 
             ratings[cond.name] = failure
 
-        if flow.default == 'A':
+        if flow.default == "A":
             count += prod(len(x) for x in ratings.values())
             valid_ratings.append(ratings)
-        elif flow.default == 'R':
+        elif flow.default == "R":
             pass
         else:
             nflow = flows[flow.default]
@@ -154,12 +159,14 @@ def part1(valid, parts):
     total = 0
     for part in parts:
         for rating in valid:
-            if all((
-                part['x'] in rating['x'],
-                part['m'] in rating['m'],
-                part['a'] in rating['a'],
-                part['s'] in rating['s'],
-            )):
+            if all(
+                (
+                    part["x"] in rating["x"],
+                    part["m"] in rating["m"],
+                    part["a"] in rating["a"],
+                    part["s"] in rating["s"],
+                )
+            ):
                 total += sum(part.values())
                 break
     return total
@@ -169,7 +176,7 @@ def part2(valid):
     return sum(prod(len(x) for x in rating.values()) for rating in valid)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     flows, parts = parse(data)
     valid = count_valid(flows)
     print(part1(valid, parts))
