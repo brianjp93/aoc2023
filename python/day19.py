@@ -107,7 +107,7 @@ def parse(data):
     return wfls, parts
 
 
-def count_valid(flows: dict[str, Workflow]):
+def get_valid(flows: dict[str, Workflow]):
     ratings: dict[str, RangeSet] = {
         "x": RangeSet(start=1, end=4000),
         "m": RangeSet(start=1, end=4000),
@@ -115,7 +115,6 @@ def count_valid(flows: dict[str, Workflow]):
         "s": RangeSet(start=1, end=4000),
     }
     stack = [(ratings, flows["in"])]
-    count = 0
     valid_ratings: list[dict[str, RangeSet]] = []
     while stack:
         ratings, flow = stack.pop()
@@ -127,12 +126,10 @@ def count_valid(flows: dict[str, Workflow]):
             else:
                 success = rating - RangeSet(start=1, end=cond.value)
                 failure = rating - RangeSet(start=cond.value + 1, end=4000)
-
             if cond.action == "A":
                 nratings = deepcopy(ratings)
                 nratings[cond.name] = success
                 valid_ratings.append(nratings)
-                # count += prod(len(x) for x in nratings.values())
             elif cond.action == "R":
                 pass
             else:
@@ -140,11 +137,8 @@ def count_valid(flows: dict[str, Workflow]):
                 nratings = deepcopy(ratings)
                 nratings[cond.name] = success
                 stack.append((nratings, nflow))
-
             ratings[cond.name] = failure
-
         if flow.default == "A":
-            count += prod(len(x) for x in ratings.values())
             valid_ratings.append(ratings)
         elif flow.default == "R":
             pass
@@ -178,6 +172,6 @@ def part2(valid):
 
 if __name__ == "__main__":
     flows, parts = parse(data)
-    valid = count_valid(flows)
-    print(part1(valid, parts))
-    print(f"{part2(valid)}")
+    valid = get_valid(flows)
+    print(f"{part1(valid, parts)=}")
+    print(f"{part2(valid)=}")
