@@ -121,10 +121,6 @@ def part1():
     return system.low_count * system.high_count
 
 
-@dataclass
-class Period:
-    start: list[int] = field(default_factory=list)
-
 def part2():
     system = parse(data)
     watching = ['ph', 'vn', 'kt', 'hn']
