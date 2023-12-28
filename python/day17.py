@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import TypeAlias
-from queue import PriorityQueue
+from queue import Empty, PriorityQueue
 
 Coord: TypeAlias = tuple[int, int]
 Map: TypeAlias = dict[Coord, int]
@@ -42,13 +42,16 @@ def get_adj(m: Map, coord: Coord):
 def shortest_path(m: Map, must_turn_min=0, must_turn_max=3):
     seen: dict[tuple[Coord, int, Coord], int] = {}
     stack: PriorityQueue[tuple[int, Coord, int, Coord]] = PriorityQueue()
-    stack.put((0, (0, 0), 0, (0, 0)))
+    stack.put((0, (0, 0), 0, (0, 0)), block=False)
     max_x = max(x[0] for x in m.keys())
     max_y = max(x[1] for x in m.keys())
     end = (max_x, max_y)
     short = float('inf')
-    while not stack.empty():
-        heat_loss, coord, turn, facing = stack.get()
+    while True:
+        try:
+            heat_loss, coord, turn, facing = stack.get(block=False)
+        except Empty:
+            break
 
         # check cache
         key = (coord, turn, facing)
@@ -63,14 +66,14 @@ def shortest_path(m: Map, must_turn_min=0, must_turn_max=3):
 
         if heat_loss == 0:
             for adj, nheat, nfacing in get_adj(m, coord):
-                stack.put((nheat, adj, 1, nfacing))
+                stack.put((nheat, adj, 1, nfacing), block=False)
             continue
 
         if turn < must_turn_min:
             ncoord = facing[0] + coord[0], facing[1] + coord[1]
             nheat = m.get(ncoord, None)
             if nheat is not None:
-                stack.put((nheat + heat_loss, ncoord, turn + 1, facing))
+                stack.put((nheat + heat_loss, ncoord, turn + 1, facing), block=False)
             continue
 
         if must_turn_min <= turn <= must_turn_max:
@@ -84,7 +87,7 @@ def shortest_path(m: Map, must_turn_min=0, must_turn_max=3):
                         continue
                 else:
                     nturn = 1
-                stack.put((nheat + heat_loss, ncoord, nturn, d))
+                stack.put((nheat + heat_loss, ncoord, nturn, d), block=False)
 
     return short
 
