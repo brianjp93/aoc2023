@@ -1,21 +1,10 @@
 from copy import deepcopy
-from functools import lru_cache
 from pathlib import Path
-from typing import Self, TypeAlias
-from queue import SimpleQueue as Queue, Empty
+from typing import Self
 from dataclasses import dataclass, field
-from math import inf
 
 
 data = (Path(__file__).parent.parent / "data" / "day22.txt").read_text()
-
-# data = """1,0,1~1,2,1
-# 0,0,2~2,0,2
-# 0,2,3~2,2,3
-# 0,0,4~0,2,4
-# 2,0,5~2,2,5
-# 0,1,6~2,1,6
-# 1,1,8~1,1,9"""
 
 @dataclass(frozen=True, order=True)
 class Point:
