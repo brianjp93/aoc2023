@@ -121,7 +121,7 @@ class Tower:
         return bricks
 
     def disintegratable(self):
-        bricks = []
+        bricks: list[Brick] = []
         for brick in self.bricks:
             supporting = self.supporting(brick)
             if not supporting:
